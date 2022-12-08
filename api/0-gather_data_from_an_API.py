@@ -8,23 +8,36 @@ from sys import argv
 
 
 if __name__ == "__main__":
-    base_url = 'https://jsonplaceholder.typicode.com/users/'
-    user_id = argv[1]
-    final_msg = 'Employee {} is done with tasks({}/{}):'
+    id_employee = int(argv[1])
+    employee_name = ""
+    number_of_done_task = 0
+    total_number_of_task = 0
+    task_title = []
 
-    user_url = '{}{}'.format(base_url, user_id)
-    todo_url = '{}{}/todos'.format(base_url, user_id)
-    completed_tasks_url = '{}?completed=true'.format(todo_url)
+    url_users = 'https://jsonplaceholder.typicode.com/users'
+    url_todos = 'https://jsonplaceholder.typicode.com/todos'
 
-    user = get(user_url).json()
-    all_tasks = get(todo_url).json()
-    completed_tasks = get(completed_tasks_url).json()
+    response_one = get(url_users)
+    response_two = get(url_todos)
 
-    name = user.get('name')
-    total_tasks = len(all_tasks)
-    done_tasks = len(completed_tasks)
+    if response_one.status_code == 200:
+        response_json_usr = response_one.json()
+        response_json_tod = response_two.json()
 
-    print(final_msg.format(name, done_tasks, total_tasks))
+        for user in response_json_usr:
+            if (user['id'] == id_employee):
+                employee_name = user['name']
 
-    for task in completed_tasks:
-        print('\t {}'.format(task.get("title")))
+                for tod in response_json_tod:
+                    if tod['userId'] == id_employee:
+                        total_number_of_task += 1
+                        if tod['completed'] is True:
+                            number_of_done_task += 1
+                            task_title.append(tod['title'])
+
+        print('Employee {} is done with tasks({}/{}):'
+              .format(employee_name, number_of_done_task,
+                      total_number_of_task))
+        for title in task_title:
+            print('\t {}'.format(title))
+

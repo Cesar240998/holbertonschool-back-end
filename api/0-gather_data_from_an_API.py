@@ -37,4 +37,4 @@ def information_employee():
 
 
 if __name__ == '__main__':
-    get_api()
+    information_employee()

@@ -7,38 +7,43 @@ from requests import get
 from sys import argv
 
 
+def information_employee():
+    """
+       returns information about employees
+    """
+    id_employee = int(argv[1])
+    id_employee = int(argv[1])
+    employee_name = ""
+    number_of_done_task = 0
+    total_number_of_task = 0
+    task_title = []
+
+    url_users = 'https://jsonplaceholder.typicode.com/users'
+    url_todos = 'https://jsonplaceholder.typicode.com/todos'
+
+    response_one = get(url_users)
+    response_two = get(url_todos)
+
+    if response_one.status_code == 200:
+        response_json_usr = response_one.json()
+        response_json_tod = response_two.json()
+
+        for user in response_json_usr:
+            if (user['id'] == id_employee):
+                employee_name = user['name']
+
+                for tod in response_json_tod:
+                    if tod['userId'] == id_employee:
+                        total_number_of_task += 1
+                        if tod['completed'] is True:
+                            number_of_done_task += 1
+                            task_title.append(tod['title'])
+
+        print('Employee {} is done with tasks({}/{}):'
+              .format(employee_name, number_of_done_task,
+                      total_number_of_task))
+        for title in task_title:
+            print('\t {}'.format(title))
+
 if __name__ == "__main__":
-    # url base
-    url_base = 'https://jsonplaceholder.typicode.com/'
-    user_id = int(argv[1])
-    EMPLOYEE_NAME = ""
-    msg = 'Employee {} is done with tasks({}/{}):'
-    # url (all_user, id_user, todos, cmp_task)
-    url_user = '{}users'.format(url_base)
-    url_id = '{}{}'.format(url_user, user_id)
-    url_todos = '{}todos'.format(url_base)
-    url_cmp_tk = '{}?completed=true'.format(url_todos)
-    response_user = requests.get(url_user)
-    user_json = response_user.json()
-
-    for i in user_json:
-        if i.get("id") == user_id:
-            EMPLOYEE_NAME = i.get("name")
-    response_todos = requests.get(url_todos)
-    todos_json = response_todos.json()
-    DONE_TASKS = []
-    for i in todos_json:
-        if i.get("userId") == user_id and i.get("completed") is True:
-            DONE_TASKS.append(i.get("title"))
-    NUMBER_OF_DONE_TASKS = len(DONE_TASKS)
-    TOTAL_NUMBER_OF_TASK = 0
-
-    for i in todos_json:
-        if i.get("userId") == user_id:
-            TOTAL_NUMBER_OF_TASK += 1
-    print("Employee {} is done with tasks({}/{}):"
-          .format(EMPLOYEE_NAME,
-                  NUMBER_OF_DONE_TASKS,
-                  TOTAL_NUMBER_OF_TASK))
-    for i in DONE_TASKS:
-        print("\t {}".format(i))
+    information_employee()

@@ -1,49 +1,36 @@
 #!/usr/bin/python3
-"""
-Using a REST API, for a given employee ID,
-returns information about his/her TODO list progress.
-"""
+''' Return information about his/her TODO list progress from an REST API '''
 from requests import get
 from sys import argv
 
 
-def information_employee():
-    """
-       returns information about employees
-    """
-    id_employee = int(argv[1])
-    id_employee = int(argv[1])
-    employee_name = ""
-    number_of_done_task = 0
-    total_number_of_task = 0
-    task_title = []
+def info_employee():
+    ''' Gather data from an API '''
+    id_user = int(argv[1])
+    name_employe = ''
+    number_task = 0
+    total_number_task = 0
+    list_task = []
 
-    url_users = 'https://jsonplaceholder.typicode.com/users'
-    url_todos = 'https://jsonplaceholder.typicode.com/todos'
+    url_users = get('https://jsonplaceholder.typicode.com/users').json()
+    for user in url_users:
+        if user['id'] == id_user:
+            name_employe = user['name']
+            break
 
-    response_one = get(url_users)
-    response_two = get(url_todos)
+    url_task = get('https://jsonplaceholder.typicode.com/todos').json()
+    for task in url_task:
+        if task['userId'] == id_user:
+            if task['completed'] is True:
+                list_task.append(task['title'])
+                number_task += 1
+            total_number_task += 1
+    print('Employee {} is done with tasks({}/{}):'.format(name_employe,
+                                                          number_task,
+                                                          total_number_task))
+    for title in list_task:
+        print('\t {}'.format(title))
 
-    if response_one.status_code == 200:
-        response_json_usr = response_one.json()
-        response_json_tod = response_two.json()
 
-        for user in response_json_usr:
-            if (user['id'] == id_employee):
-                employee_name = user['name']
-
-                for tod in response_json_tod:
-                    if tod['userId'] == id_employee:
-                        total_number_of_task += 1
-                        if tod['completed'] is True:
-                            number_of_done_task += 1
-                            task_title.append(tod['title'])
-
-        print('Employee {} is done with tasks({}/{}):'
-              .format(employee_name, number_of_done_task,
-                      total_number_of_task))
-        for title in task_title:
-            print('\t {}'.format(title))
-
-if __name__ == "__main__":
-    information_employee()
+if __name__ == '__main__':
+    info_employee()

@@ -1,32 +1,50 @@
 #!/usr/bin/python3
-"""
-Using a REST API, returns information about
-all users TODO list progress.
-On JSON format.
-"""
-import json
+""" script to export data in the JSON format """
 from requests import get
+import json
+
+
+def info_employee():
+    """
+       Records all tasks from all employees
+    """
+    user_id = 0
+    user_name = ""
+    task_completed_status = False
+    task_title = ""
+    dict_id = {}
+    list_task = []
+    dict_task = {}
+
+    url_users = 'https://jsonplaceholder.typicode.com/users'
+    url_todos = 'https://jsonplaceholder.typicode.com/todos'
+
+    response_one = get(url_users)
+    response_two = get(url_todos)
+
+    if response_one.status_code == 200:
+        response_json_usr = response_one.json()
+        response_json_tod = response_two.json()
+
+        for usr in response_json_usr:
+            user_id = usr['id']
+            user_name = usr['username']
+            dict_id[str(user_id)] = list_task
+            for tod in response_json_tod:
+                if (tod['userId'] == user_id):
+                    task_completed_status = tod['completed']
+                    task_title = tod['title']
+                    dict_task = {"username": user_name,
+                                 "task": task_title,
+                                 "completed": task_completed_status}
+                    list_task.append(dict_task)
+            list_task = []
+            dict_task = {}
+
+        with open("todo_all_employees.json", 'w',
+                  encoding='UTF8') as fjson:
+            json.dump(dict_id, fjson)
 
 
 if __name__ == "__main__":
-    base_url = 'https://jsonplaceholder.typicode.com/users'
-    name_file = 'todo_all_employees.json'
-
-    all_users = get(base_url).json()
-
-    with open(name_file, 'w', encoding='UTF8') as file:
-        final_obj = {}
-
-    for user in all_users:
-        formated_tasks = []
-        user_id = user.get("id")
-        user_task = get("{}/{}/todos".format(base_url, user_id)).json()
-        for task in user_task:
-            tmp_obj = {
-                "username": user.get("username"),
-                "task": task.get("title"),
-                "completed": task.get("completed"),
-            }
-            formated_tasks.append(tmp_obj)
-        final_obj[user_id] = formated_tasks
-    json.dump(final_obj, file, indent=4)
+    info_employee()
